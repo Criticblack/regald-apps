@@ -12,8 +12,8 @@ export async function generateMetadata({ params }) {
   const name = localizedField(category.name, locale);
   const desc = localizedField(category.description, locale);
   return {
-    title: `${name} — Regald Apps`,
-    description: desc || `${name} — Regald Apps`,
+    title: `${name} — Regald Tech`,
+    description: desc || `${name} — Regald Tech`,
   };
 }
 

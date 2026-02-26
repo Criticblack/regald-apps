@@ -53,7 +53,7 @@ export default function Navbar() {
               fontFamily: 'var(--heading)', fontSize: 17, fontWeight: 700,
               color: 'var(--text)', letterSpacing: '-0.02em',
             }}>
-              regald<span style={{ color: 'var(--accent)' }}>.</span>apps
+              regald<span style={{ color: 'var(--accent)' }}>.</span>tech
             </div>
             <div style={{
               fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.12em',

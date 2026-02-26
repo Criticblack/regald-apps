@@ -2,7 +2,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata = {
-  title: 'Regald Apps — Building in Public',
+  title: 'Regald Tech — Building in Public',
   description: 'Android developer from Moldova. Building apps, streaming the process, documenting everything.',
 };
 

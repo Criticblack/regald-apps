@@ -3,7 +3,7 @@ import CategoryPage from '@/components/CategoryPage';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
-export const metadata = { title: 'Blog — Regald Apps' };
+export const metadata = { title: 'Blog — Regald Tech' };
 
 export default async function BlogPage() {
   const { category, posts } = await getPostsByCategory('blog');

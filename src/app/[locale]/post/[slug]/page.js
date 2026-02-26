@@ -15,7 +15,7 @@ export async function generateMetadata({ params }) {
   const { data: post } = await supabase.from('posts').select('title, description').eq('slug', slug).single();
   if (!post) return { title: 'Not found' };
   return {
-    title: `${localizedField(post.title, locale)} — Regald Apps`,
+    title: `${localizedField(post.title, locale)} — Regald Tech`,
     description: localizedField(post.description, locale),
   };
 }
