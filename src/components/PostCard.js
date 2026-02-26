@@ -3,13 +3,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import VideoPlayer from './VideoPlayer';
 
-const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
+import { localizedField } from '@/lib/localize';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
 
 export default function PostCard({ post }) {
   const locale = useLocale();

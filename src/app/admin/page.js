@@ -152,7 +152,7 @@ export default function AdminDashboard() {
                       color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden',
                       textOverflow: 'ellipsis',
                     }}>
-                      {post.title}
+                      {typeof post.title === 'object' ? (post.title.ro || post.title.en || '') : post.title}
                     </h3>
                     {post.draft && (
                       <span style={{

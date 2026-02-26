@@ -1,4 +1,5 @@
 import { getPostsByCategory } from '@/lib/queries';
+import { localizedField } from '@/lib/localize';
 import CategoryPage from '@/components/CategoryPage';
 import { notFound } from 'next/navigation';
 
@@ -8,10 +9,11 @@ export async function generateMetadata({ params }) {
   const { category: categorySlug, locale } = await params;
   const { category } = await getPostsByCategory(categorySlug);
   if (!category) return { title: 'Not found' };
-  const name = typeof category.name === 'object' ? (category.name[locale] || category.name.en || category.name.ro || '') : category.name;
+  const name = localizedField(category.name, locale);
+  const desc = localizedField(category.description, locale);
   return {
     title: `${name} — Regald Apps`,
-    description: typeof category.description === 'object' ? (category.description[locale] || category.description.en || category.description.ro || '') : (category.description || `${name} — Regald Apps`),
+    description: desc || `${name} — Regald Apps`,
   };
 }
 

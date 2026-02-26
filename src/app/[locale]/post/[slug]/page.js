@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { localizedField } from '@/lib/localize';
 import PostContent from './PostContent';
 import { notFound } from 'next/navigation';
 
@@ -13,9 +14,10 @@ export async function generateMetadata({ params }) {
   const { slug, locale } = await params;
   const { data: post } = await supabase.from('posts').select('title, description').eq('slug', slug).single();
   if (!post) return { title: 'Not found' };
-  const title = typeof post.title === 'object' ? (post.title[locale] || post.title.en || post.title.ro || '') : post.title;
-  const description = typeof post.description === 'object' ? (post.description[locale] || post.description.en || post.description.ro || '') : post.description;
-  return { title: `${title} — Regald Apps`, description };
+  return {
+    title: `${localizedField(post.title, locale)} — Regald Apps`,
+    description: localizedField(post.description, locale),
+  };
 }
 
 export default async function PostPage({ params }) {

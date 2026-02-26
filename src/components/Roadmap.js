@@ -5,11 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { GridBg } from './Decorations';
 import Reveal from './Reveal';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+import { localizedField } from '@/lib/localize';
 
 export default function Roadmap({ embedded = false }) {
   const [topics, setTopics] = useState([]);
@@ -89,7 +85,7 @@ export default function Roadmap({ embedded = false }) {
                       <h3 style={{ fontFamily: 'var(--heading)', fontSize: 17, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
                         {localizedField(topic.title, locale)}
                       </h3>
-                      {topic.description && (
+                      {localizedField(topic.description, locale) && (
                         <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-3)' }}>{localizedField(topic.description, locale)}</p>
                       )}
                     </div>

@@ -7,11 +7,7 @@ import Logo from './Logo';
 import ThemeToggle from './ThemeToggle';
 import LanguageSwitcher from './LanguageSwitcher';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+import { localizedField } from '@/lib/localize';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);

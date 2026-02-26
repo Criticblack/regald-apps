@@ -10,13 +10,9 @@ import { GradientOrbs } from '@/components/Decorations';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
+import { localizedField } from '@/lib/localize';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
 
 export default function PostContent({ post }) {
   const locale = useLocale();

@@ -7,11 +7,7 @@ import Reveal from '@/components/Reveal';
 import Logo from '@/components/Logo';
 import { GradientOrbs } from '@/components/Decorations';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+import { localizedField } from '@/lib/localize';
 
 export default function CategoryPage({ category, posts }) {
   const [activeTag, setActiveTag] = useState(null);
@@ -36,7 +32,7 @@ export default function CategoryPage({ category, posts }) {
           <h1 style={{ fontFamily: 'var(--heading)', fontSize: 36, fontWeight: 700, color: 'var(--text)', marginBottom: 8, letterSpacing: '-0.02em' }}>
             {categoryName}
           </h1>
-          {categoryDescription && (
+          {!!categoryDescription && (
             <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text-2)', maxWidth: 500 }}>
               {categoryDescription}
             </p>

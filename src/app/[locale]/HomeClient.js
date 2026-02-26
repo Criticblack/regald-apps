@@ -10,13 +10,9 @@ import Reveal from '@/components/Reveal';
 import Logo from '@/components/Logo';
 import { GridBg, Cursor, CodeSnippet, GradientOrbs } from '@/components/Decorations';
 
-const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
+import { localizedField } from '@/lib/localize';
 
-function localizedField(field, locale) {
-  if (!field) return '';
-  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
-  return field;
-}
+const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
 
 export default function HomeClient({ posts, categories = [] }) {
   const [filter, setFilter] = useState('all');
@@ -75,7 +71,7 @@ export default function HomeClient({ posts, categories = [] }) {
                 </h1>
               </Link>
 
-              {featured.description && (
+              {localizedField(featured.description, locale) && (
                 <p style={{
                   fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.75,
                   color: 'var(--text-2)', maxWidth: 420, marginBottom: 28,
