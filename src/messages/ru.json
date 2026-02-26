@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "home": "Главная",
+    "roadmap": "Roadmap",
+    "about": "О нас"
+  },
+  "hero": {
+    "latestStream": "latest stream",
+    "latestPost": "latest post"
+  },
+  "posts": {
+    "sectionComment": "// posts",
+    "allPosts": "Все посты",
+    "filterAll": "Все",
+    "filterText": "</> Текст",
+    "noPostsFilter": "// нет постов с этим фильтром",
+    "noPostsCategory": "// нет постов в этой категории",
+    "noPostsTag": "// нет постов с тегом {tag}",
+    "badgeStream": "STREAM",
+    "badgeText": "TEXT"
+  },
+  "terminal": {
+    "quote": "Я не гуру. Я разработчик из Молдовы, который создаёт приложения, делает ошибки в прямом эфире и документирует всё."
+  },
+  "about": {
+    "role": "Android Developer · Moldova",
+    "description": "Создаю Android-приложения, стримлю процесс и документирую всё, что узнаю. От идеи до Play Store — с ошибками, рефакторингами и иногда кодом, который действительно работает.",
+    "youtubeLabel": "YouTube:",
+    "youtubeName": "Regald Apps",
+    "youtubeFocus": "Focus: Android dev, live coding, app launches"
+  },
+  "footer": {
+    "copyright": "© 2026 regald.apps",
+    "tagline": "made with caffeine && kotlin"
+  },
+  "comments": {
+    "title": "Комментарии",
+    "placeholder": "Написать комментарий...",
+    "placeholderAuth": "Войдите, чтобы комментировать...",
+    "send": "Отправить",
+    "noComments": "// нет комментариев. будь первым.",
+    "deleteConfirm": "Удалить комментарий?",
+    "anonymous": "Аноним",
+    "authRequired": "// требуется авторизация",
+    "now": "сейчас"
+  },
+  "rating": {
+    "noVotes": "нет голосов"
+  },
+  "roadmap": {
+    "comment": "// roadmap",
+    "title": "Что я создаю",
+    "description": "Приложения, над которыми я работаю — прогресс в реальном времени.",
+    "statusShipped": "Shipped",
+    "statusBuilding": "Building",
+    "statusPlanned": "Planned",
+    "inProgress": "в процессе"
+  },
+  "auth": {
+    "login": "Войти",
+    "signup": "Создать аккаунт",
+    "googleButton": "Продолжить с Google",
+    "or": "или",
+    "nameLabel": "Ваше имя",
+    "emailLabel": "Email",
+    "passwordLabel": "Пароль",
+    "namePlaceholder": "Ваше имя",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Пароль",
+    "submitLogin": "Войти",
+    "submitSignup": "Создать аккаунт",
+    "loading": "Подождите...",
+    "subtitle": "// для комментариев и голосования",
+    "noAccount": "Нет аккаунта? ",
+    "hasAccount": "Уже есть аккаунт? ",
+    "switchToSignup": "Зарегистрироваться",
+    "switchToLogin": "Войти",
+    "successSignup": "Аккаунт создан! Проверьте email.",
+    "errorLogin": "Неверный email или пароль"
+  },
+  "post": {
+    "back": "← назад"
+  },
+  "category": {
+    "allFilter": "Все ({count})"
+  }
+}

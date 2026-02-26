@@ -3,10 +3,10 @@ import CategoryPage from '@/components/CategoryPage';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
-export const metadata = { title: 'Blog — Regald Apps', description: 'Texte despre Android development.' };
+export const metadata = { title: 'Streamuri — Regald Apps' };
 
-export default async function BlogPage() {
-  const { category, posts } = await getPostsByCategory('blog');
+export default async function StreamuriPage() {
+  const { category, posts } = await getPostsByCategory('streamuri');
   if (!category) notFound();
   return <CategoryPage category={category} posts={posts} />;
 }

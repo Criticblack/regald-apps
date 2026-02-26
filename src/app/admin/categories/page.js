@@ -5,13 +5,27 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import LanguageTabs from '@/components/LanguageTabs';
+
+function initI18nField(val) {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return { ro: val.ro || '', en: val.en || '', ru: val.ru || '' };
+  return { ro: typeof val === 'string' ? val : '', en: '', ru: '' };
+}
+
+function getDisplayName(field) {
+  if (!field) return '';
+  if (typeof field === 'object') return field.ro || field.en || '';
+  return field;
+}
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
-  const [newName, setNewName] = useState('');
-  const [newDesc, setNewDesc] = useState('');
+  const [newName, setNewName] = useState({ ro: '', en: '', ru: '' });
+  const [newDesc, setNewDesc] = useState({ ro: '', en: '', ru: '' });
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeLang, setActiveLang] = useState('ro');
+  const [editLang, setEditLang] = useState('ro');
   const router = useRouter();
 
   useEffect(() => {
@@ -38,17 +52,21 @@ export default function AdminCategories() {
 
   async function handleAdd(e) {
     e.preventDefault();
-    if (!newName.trim()) return;
-    const slug = toSlug(newName);
+    if (!newName.ro.trim() && !newName.en.trim()) return;
+    const slugSource = newName.en.trim() || newName.ro.trim();
+    const slug = toSlug(slugSource);
+    const descObj = (newDesc.ro || newDesc.en || newDesc.ru)
+      ? { ro: newDesc.ro.trim(), en: newDesc.en.trim(), ru: newDesc.ru.trim() }
+      : null;
     const { error } = await supabase.from('categories').insert({
-      name: newName.trim(),
+      name: { ro: newName.ro.trim(), en: newName.en.trim(), ru: newName.ru.trim() },
       slug,
-      description: newDesc.trim() || null,
+      description: descObj,
       sort_order: categories.length + 1,
     });
     if (error) { alert('Eroare: ' + error.message); return; }
-    setNewName('');
-    setNewDesc('');
+    setNewName({ ro: '', en: '', ru: '' });
+    setNewDesc({ ro: '', en: '', ru: '' });
     fetchCategories();
   }
 
@@ -66,6 +84,14 @@ export default function AdminCategories() {
     if (!confirm('Sigur vrei să ștergi această categorie? Postările din ea vor rămâne fără categorie.')) return;
     await supabase.from('categories').delete().eq('id', id);
     fetchCategories();
+  }
+
+  function updateCatField(catId, field, lang, value) {
+    setCategories(categories.map(c => {
+      if (c.id !== catId) return c;
+      const current = initI18nField(c[field]);
+      return { ...c, [field]: { ...current, [lang]: value } };
+    }));
   }
 
   return (
@@ -99,26 +125,27 @@ export default function AdminCategories() {
           <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, letterSpacing: '0.08em' }}>
             ADAUGĂ CATEGORIE NOUĂ
           </div>
+          <LanguageTabs activeLang={activeLang} onSwitch={setActiveLang} />
           <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
             <input
               className="admin-input"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              placeholder="Nume (ex: Recenzii)"
-              required
+              value={newName[activeLang]}
+              onChange={e => setNewName({ ...newName, [activeLang]: e.target.value })}
+              placeholder={`Nume (${activeLang.toUpperCase()})`}
+              required={activeLang === 'ro'}
               style={{ flex: 1 }}
             />
             <input
               className="admin-input"
-              value={newDesc}
-              onChange={e => setNewDesc(e.target.value)}
-              placeholder="Descriere scurtă (opțional)"
+              value={newDesc[activeLang]}
+              onChange={e => setNewDesc({ ...newDesc, [activeLang]: e.target.value })}
+              placeholder={`Descriere (${activeLang.toUpperCase()}, opțional)`}
               style={{ flex: 1.5 }}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-light)' }}>
-              Slug: /{toSlug(newName) || '...'}
+              Slug: /{toSlug(newName.en || newName.ro) || '...'}
             </span>
             <button type="submit" className="admin-btn" style={{ padding: '8px 20px', fontSize: 11 }}>
               + Adaugă
@@ -131,64 +158,73 @@ export default function AdminCategories() {
           {categories.map((cat, i) => (
             <div key={cat.id} style={{
               background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: 12,
-              padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 16,
+              padding: '18px 22px',
             }}>
-              <span style={{
-                fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-light)',
-                minWidth: 24,
-              }}>
-                {i + 1}.
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span style={{
+                  fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-light)',
+                  minWidth: 24,
+                }}>
+                  {i + 1}.
+                </span>
 
-              {editing === cat.id ? (
-                <div style={{ flex: 1, display: 'flex', gap: 10 }}>
-                  <input className="admin-input" value={cat.name}
-                    onChange={e => setCategories(categories.map(c => c.id === cat.id ? { ...c, name: e.target.value } : c))}
-                    style={{ flex: 1 }} />
-                  <input className="admin-input" value={cat.description || ''}
-                    onChange={e => setCategories(categories.map(c => c.id === cat.id ? { ...c, description: e.target.value } : c))}
-                    style={{ flex: 1.5 }} placeholder="Descriere" />
-                </div>
-              ) : (
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontFamily: 'var(--serif)', fontSize: 16, color: 'var(--text)' }}>
-                    {cat.name}
-                  </span>
-                  <span style={{
-                    fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-light)', marginLeft: 10,
-                  }}>
-                    /{cat.slug}
-                  </span>
-                  {cat.description && (
-                    <span style={{
-                      fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-muted)', marginLeft: 10,
-                    }}>
-                      — {cat.description}
+                {editing === cat.id ? (
+                  <div style={{ flex: 1 }}>
+                    <LanguageTabs activeLang={editLang} onSwitch={setEditLang} />
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <input className="admin-input"
+                        value={(typeof cat.name === 'object' ? cat.name[editLang] : (editLang === 'ro' ? cat.name : '')) || ''}
+                        onChange={e => updateCatField(cat.id, 'name', editLang, e.target.value)}
+                        placeholder={`Nume (${editLang.toUpperCase()})`}
+                        style={{ flex: 1 }} />
+                      <input className="admin-input"
+                        value={(typeof cat.description === 'object' ? cat.description?.[editLang] : (editLang === 'ro' ? cat.description : '')) || ''}
+                        onChange={e => updateCatField(cat.id, 'description', editLang, e.target.value)}
+                        placeholder={`Descriere (${editLang.toUpperCase()})`}
+                        style={{ flex: 1.5 }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontFamily: 'var(--serif)', fontSize: 16, color: 'var(--text)' }}>
+                      {getDisplayName(cat.name)}
                     </span>
+                    <span style={{
+                      fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-light)', marginLeft: 10,
+                    }}>
+                      /{cat.slug}
+                    </span>
+                    {cat.description && (
+                      <span style={{
+                        fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-muted)', marginLeft: 10,
+                      }}>
+                        — {getDisplayName(cat.description)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  {editing === cat.id ? (
+                    <>
+                      <button onClick={() => handleUpdate(cat)} className="admin-btn" style={{ padding: '5px 12px', fontSize: 10 }}>
+                        Salvează
+                      </button>
+                      <button onClick={() => { setEditing(null); fetchCategories(); }} className="admin-btn admin-btn-outline" style={{ padding: '5px 12px', fontSize: 10 }}>
+                        Anulează
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => { setEditing(cat.id); setEditLang('ro'); }} className="admin-btn admin-btn-outline" style={{ padding: '5px 12px', fontSize: 10 }}>
+                        Editează
+                      </button>
+                      <button onClick={() => handleDelete(cat.id)} className="admin-btn admin-btn-danger" style={{ padding: '5px 12px', fontSize: 10 }}>
+                        Șterge
+                      </button>
+                    </>
                   )}
                 </div>
-              )}
-
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                {editing === cat.id ? (
-                  <>
-                    <button onClick={() => handleUpdate(cat)} className="admin-btn" style={{ padding: '5px 12px', fontSize: 10 }}>
-                      Salvează
-                    </button>
-                    <button onClick={() => { setEditing(null); fetchCategories(); }} className="admin-btn admin-btn-outline" style={{ padding: '5px 12px', fontSize: 10 }}>
-                      Anulează
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => setEditing(cat.id)} className="admin-btn admin-btn-outline" style={{ padding: '5px 12px', fontSize: 10 }}>
-                      Editează
-                    </button>
-                    <button onClick={() => handleDelete(cat.id)} className="admin-btn admin-btn-danger" style={{ padding: '5px 12px', fontSize: 10 }}>
-                      Șterge
-                    </button>
-                  </>
-                )}
               </div>
             </div>
           ))}

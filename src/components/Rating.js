@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 import AuthModal from './AuthModal';
 
@@ -10,6 +11,7 @@ export default function Rating({ postId }) {
   const [hover, setHover] = useState(0);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const t = useTranslations('rating');
 
   useEffect(() => {
     fetchRatings();
@@ -54,7 +56,7 @@ export default function Rating({ postId }) {
         {avg > 0 ? avg.toFixed(1) : '—'}
       </span>
       <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>
-        {total > 0 ? `(${total})` : 'fără voturi'}
+        {total > 0 ? `(${total})` : t('noVotes')}
       </span>
       {userRating > 0 && (
         <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--accent)', background: 'var(--accent-dim)', padding: '3px 8px', borderRadius: 4 }}>

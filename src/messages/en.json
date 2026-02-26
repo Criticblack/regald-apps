@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "home": "Home",
+    "roadmap": "Roadmap",
+    "about": "About"
+  },
+  "hero": {
+    "latestStream": "latest stream",
+    "latestPost": "latest post"
+  },
+  "posts": {
+    "sectionComment": "// posts",
+    "allPosts": "All posts",
+    "filterAll": "All",
+    "filterText": "</> Text",
+    "noPostsFilter": "// no posts with this filter",
+    "noPostsCategory": "// no posts in this category",
+    "noPostsTag": "// no posts with tag {tag}",
+    "badgeStream": "STREAM",
+    "badgeText": "TEXT"
+  },
+  "terminal": {
+    "quote": "I'm not a guru. I'm a developer from Moldova who builds apps, makes mistakes live on stream, and documents everything."
+  },
+  "about": {
+    "role": "Android Developer · Moldova",
+    "description": "I build Android apps, stream the process, and document everything I learn along the way. From idea to Play Store — with mistakes, refactors, and occasionally code that actually works.",
+    "youtubeLabel": "YouTube:",
+    "youtubeName": "Regald Apps",
+    "youtubeFocus": "Focus: Android dev, live coding, app launches"
+  },
+  "footer": {
+    "copyright": "© 2026 regald.apps",
+    "tagline": "made with caffeine && kotlin"
+  },
+  "comments": {
+    "title": "Comments",
+    "placeholder": "Write a comment...",
+    "placeholderAuth": "Log in to comment...",
+    "send": "Send",
+    "noComments": "// no comments. be the first.",
+    "deleteConfirm": "Delete comment?",
+    "anonymous": "Anonymous",
+    "authRequired": "// authentication required",
+    "now": "now"
+  },
+  "rating": {
+    "noVotes": "no votes"
+  },
+  "roadmap": {
+    "comment": "// roadmap",
+    "title": "What I'm building",
+    "description": "Apps I'm working on — progress tracked in real time.",
+    "statusShipped": "Shipped",
+    "statusBuilding": "Building",
+    "statusPlanned": "Planned",
+    "inProgress": "in progress"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Create account",
+    "googleButton": "Continue with Google",
+    "or": "or",
+    "nameLabel": "Your name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "submitLogin": "Log in",
+    "submitSignup": "Create account",
+    "loading": "Wait...",
+    "subtitle": "// to comment and vote",
+    "noAccount": "Don't have an account? ",
+    "hasAccount": "Already have an account? ",
+    "switchToSignup": "Sign up",
+    "switchToLogin": "Log in",
+    "successSignup": "Account created! Check your email.",
+    "errorLogin": "Incorrect email or password"
+  },
+  "post": {
+    "back": "← back"
+  },
+  "category": {
+    "allFilter": "All ({count})"
+  }
+}

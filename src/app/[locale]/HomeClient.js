@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import Navbar from '@/components/Navbar';
 import PostCard from '@/components/PostCard';
 import VideoPlayer from '@/components/VideoPlayer';
@@ -9,9 +10,19 @@ import Reveal from '@/components/Reveal';
 import Logo from '@/components/Logo';
 import { GridBg, Cursor, CodeSnippet, GradientOrbs } from '@/components/Decorations';
 
+const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
+
+function localizedField(field, locale) {
+  if (!field) return '';
+  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
+  return field;
+}
+
 export default function HomeClient({ posts, categories = [] }) {
   const [filter, setFilter] = useState('all');
   const [loaded, setLoaded] = useState(false);
+  const locale = useLocale();
+  const t = useTranslations();
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
@@ -22,7 +33,7 @@ export default function HomeClient({ posts, categories = [] }) {
   );
 
   const featDate = featured?.published_at
-    ? new Date(featured.published_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })
+    ? new Date(featured.published_at).toLocaleDateString(LOCALE_MAP[locale] || 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })
     : '';
 
   return (
@@ -48,7 +59,7 @@ export default function HomeClient({ posts, categories = [] }) {
                   width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)',
                   boxShadow: '0 0 12px var(--accent)', animation: 'float 3s ease-in-out infinite',
                 }} />
-                {featured.type === 'video' ? 'latest stream' : 'latest post'}
+                {featured.type === 'video' ? t('hero.latestStream') : t('hero.latestPost')}
               </div>
 
               <Link href={`/post/${featured.slug}`} style={{ textDecoration: 'none' }}>
@@ -60,7 +71,7 @@ export default function HomeClient({ posts, categories = [] }) {
                 onMouseEnter={e => e.target.style.color = '#fff'}
                 onMouseLeave={e => e.target.style.color = 'var(--text)'}
                 >
-                  {featured.title}
+                  {localizedField(featured.title, locale)}
                 </h1>
               </Link>
 
@@ -68,7 +79,7 @@ export default function HomeClient({ posts, categories = [] }) {
                 <p style={{
                   fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.75,
                   color: 'var(--text-2)', maxWidth: 420, marginBottom: 28,
-                }}>{featured.description}</p>
+                }}>{localizedField(featured.description, locale)}</p>
               )}
 
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -121,9 +132,7 @@ export default function HomeClient({ posts, categories = [] }) {
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
             </div>
             <p style={{ fontFamily: 'var(--mono)', fontSize: 14, lineHeight: 1.7, color: 'var(--text-2)' }}>
-              <span style={{ color: 'var(--accent)' }}>$</span> Nu sunt guru.
-              Sunt un developer din Moldova care construiește aplicații,
-              face greșeli live pe stream, și documentează totul.
+              <span style={{ color: 'var(--accent)' }}>$</span> {t('terminal.quote')}
               <Cursor />
             </p>
           </div>
@@ -136,15 +145,15 @@ export default function HomeClient({ posts, categories = [] }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
             <div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent)', marginBottom: 8, letterSpacing: '0.08em' }}>
-                // posts
+                {t('posts.sectionComment')}
               </div>
               <h2 style={{ fontFamily: 'var(--heading)', fontSize: 28, fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.02em' }}>
-                Toate postările
+                {t('posts.allPosts')}
               </h2>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[['all', 'Toate'], ['text', '</> Text'],
-                ...categories.map(c => [c.slug, c.name])
+              {[['all', t('posts.filterAll')],
+                ...categories.map(c => [c.slug, localizedField(c.name, locale)])
               ].map(([k, l]) => (
                 <button key={k} onClick={() => setFilter(k)}
                   className={`filter-btn ${filter === k ? 'active' : ''}`}>
@@ -164,7 +173,7 @@ export default function HomeClient({ posts, categories = [] }) {
           {filtered.length === 0 && (
             <div style={{ textAlign: 'center', padding: 80 }}>
               <p style={{ fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--text-4)' }}>
-                // nicio postare cu acest filtru
+                {t('posts.noPostsFilter')}
               </p>
             </div>
           )}
@@ -193,29 +202,28 @@ export default function HomeClient({ posts, categories = [] }) {
                 Andrei
               </h3>
               <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-3)', marginBottom: 16 }}>
-                Android Developer · Moldova 🇲🇩
+                {t('about.role')} 🇲🇩
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {['Kotlin', 'Compose', 'ML Kit', 'MVVM', 'Coroutines'].map(t => (
-                  <span key={t} className="tag">{t}</span>
+                {['Kotlin', 'Compose', 'ML Kit', 'MVVM', 'Coroutines'].map(tg => (
+                  <span key={tg} className="tag">{tg}</span>
                 ))}
               </div>
             </div>
 
             <div>
               <p style={{ fontFamily: 'var(--sans)', fontSize: 16, lineHeight: 1.85, color: 'var(--text-2)', marginBottom: 20 }}>
-                Construiesc aplicații Android, streamuiesc procesul, și documentez tot ce învăț pe parcurs.
-                De la idee la Play Store — cu greșeli, refactorizări, și ocazional cod care chiar funcționează.
+                {t('about.description')}
               </p>
               <div style={{
                 background: 'var(--card)', border: '1px solid var(--line)',
                 borderRadius: 12, padding: '18px 22px', marginBottom: 24,
               }}>
                 <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--text-2)', lineHeight: 1.7 }}>
-                  <span style={{ color: 'var(--accent)' }}>{'//'}</span> YouTube:{' '}
-                  <span style={{ color: 'var(--text)', fontWeight: 600 }}>Regald Apps</span>
+                  <span style={{ color: 'var(--accent)' }}>{'//'}</span> {t('about.youtubeLabel')}{' '}
+                  <span style={{ color: 'var(--text)', fontWeight: 600 }}>{t('about.youtubeName')}</span>
                   <br />
-                  <span style={{ color: 'var(--accent)' }}>{'//'}</span> Focus: Android dev, live coding, app launches
+                  <span style={{ color: 'var(--accent)' }}>{'//'}</span> {t('about.youtubeFocus')}
                 </p>
               </div>
             </div>
@@ -228,9 +236,9 @@ export default function HomeClient({ posts, categories = [] }) {
         <div className="container footer-inner" style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Logo size={24} />
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>© 2026 regald.apps</span>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>{t('footer.copyright')}</span>
           </div>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>made with caffeine && kotlin</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>{t('footer.tagline')}</span>
         </div>
       </footer>
     </div>

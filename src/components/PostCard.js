@@ -1,12 +1,26 @@
 'use client';
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import VideoPlayer from './VideoPlayer';
 
+const LOCALE_MAP = { en: 'en-US', ro: 'ro-RO', ru: 'ru-RU' };
+
+function localizedField(field, locale) {
+  if (!field) return '';
+  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
+  return field;
+}
+
 export default function PostCard({ post }) {
+  const locale = useLocale();
+  const t = useTranslations('posts');
   const isVideo = post.type === 'video';
-  const date = post.published_at ? new Date(post.published_at).toLocaleDateString('ro-RO', {
+  const date = post.published_at ? new Date(post.published_at).toLocaleDateString(LOCALE_MAP[locale] || 'en-US', {
     day: 'numeric', month: 'short', year: 'numeric',
   }) : '';
+
+  const title = localizedField(post.title, locale);
+  const description = localizedField(post.description, locale);
 
   return (
     <Link href={`/post/${post.slug}`} style={{ textDecoration: 'none' }}>
@@ -26,7 +40,7 @@ export default function PostCard({ post }) {
           {/* Meta */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
             <span className={isVideo ? 'badge badge-video' : 'badge badge-text'}>
-              {isVideo ? '▶ STREAM' : '</> TEXT'}
+              {isVideo ? `▶ ${t('badgeStream')}` : `</> ${t('badgeText')}`}
             </span>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-4)' }}>
               {date}
@@ -44,14 +58,14 @@ export default function PostCard({ post }) {
             fontWeight: 600, lineHeight: 1.3, color: 'var(--text)',
             marginBottom: 10, transition: 'color 0.25s', letterSpacing: '-0.02em',
             maxWidth: isVideo ? 400 : 650,
-          }}>{post.title}</h3>
+          }}>{title}</h3>
 
           {/* Description */}
-          {post.description && (
+          {description && (
             <p style={{
               fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.7,
               color: 'var(--text-2)', maxWidth: isVideo ? 400 : 650,
-            }}>{post.description}</p>
+            }}>{description}</p>
           )}
 
           {/* Tags */}

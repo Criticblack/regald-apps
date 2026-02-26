@@ -1,24 +1,24 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { supabase } from '@/lib/supabase';
 import Logo from './Logo';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 
-const STATIC_NAV = [
-  { label: 'Acasă', href: '/' },
-];
-
-const AFTER_NAV = [
-  { label: 'Roadmap', href: '/roadmap' },
-  { label: 'Despre', href: '/#despre' },
-];
+function localizedField(field, locale) {
+  if (!field) return '';
+  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
+  return field;
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [categories, setCategories] = useState([]);
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('nav');
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -32,9 +32,10 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    ...STATIC_NAV,
-    ...categories.map(c => ({ label: c.name, href: `/${c.slug}` })),
-    ...AFTER_NAV,
+    { label: t('home'), href: '/' },
+    ...categories.map(c => ({ label: localizedField(c.name, locale), href: `/${c.slug}` })),
+    { label: t('roadmap'), href: '/roadmap' },
+    { label: t('about'), href: '/#despre' },
   ];
 
   return (
@@ -79,6 +80,7 @@ export default function Navbar() {
               );
             })}
           </div>
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </div>

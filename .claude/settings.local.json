@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd C:\\\\siteul meu\\\\regald-apps:*)",
+      "Bash(head:*)"
+    ]
+  }
+}

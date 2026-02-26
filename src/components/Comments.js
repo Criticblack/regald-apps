@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 import AuthModal from './AuthModal';
 
@@ -10,6 +11,7 @@ export default function Comments({ postId }) {
   const [showAuth, setShowAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const t = useTranslations('comments');
 
   useEffect(() => {
     fetchComments();
@@ -35,14 +37,14 @@ export default function Comments({ postId }) {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Ștergi comentariul?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await supabase.from('comments').delete().eq('id', id);
     setComments(comments.filter(c => c.id !== id));
   }
 
   function timeAgo(d) {
     const mins = Math.floor((Date.now() - new Date(d)) / 60000);
-    if (mins < 1) return 'acum';
+    if (mins < 1) return t('now');
     if (mins < 60) return `${mins}m`;
     const h = Math.floor(mins / 60);
     if (h < 24) return `${h}h`;
@@ -53,12 +55,12 @@ export default function Comments({ postId }) {
     <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--line)' }}>
       <h3 style={{ fontFamily: 'var(--heading)', fontSize: 20, fontWeight: 600, color: 'var(--text)', marginBottom: 24 }}>
         <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 400 }}>// </span>
-        Comentarii {comments.length > 0 && <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>({comments.length})</span>}
+        {t('title')} {comments.length > 0 && <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>({comments.length})</span>}
       </h3>
 
       <form onSubmit={handleSubmit} style={{ marginBottom: 32 }}>
         <textarea value={newComment} onChange={e => setNewComment(e.target.value)}
-          placeholder={user ? 'Scrie un comentariu...' : 'Conectează-te pentru a comenta...'}
+          placeholder={user ? t('placeholder') : t('placeholderAuth')}
           onClick={() => { if (!user) setShowAuth(true); }}
           maxLength={2000} style={{
             width: '100%', padding: '14px 16px', minHeight: 100,
@@ -72,11 +74,11 @@ export default function Comments({ postId }) {
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-4)' }}>
-            {user ? `→ ${user.user_metadata?.full_name || user.email}` : '// trebuie autentificare'}
+            {user ? `→ ${user.user_metadata?.full_name || user.email}` : t('authRequired')}
           </span>
           <button type="submit" className="admin-btn" disabled={!user || !newComment.trim() || submitting}
             style={{ padding: '8px 20px', fontSize: 11, opacity: (!user || !newComment.trim()) ? 0.4 : 1 }}>
-            {submitting ? '...' : 'Trimite'}
+            {submitting ? '...' : t('send')}
           </button>
         </div>
       </form>
@@ -84,7 +86,7 @@ export default function Comments({ postId }) {
       {loading ? <p style={{ fontFamily: 'var(--mono)', color: 'var(--text-4)' }}>loading...</p> :
         comments.length === 0 ? (
           <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--text-4)', textAlign: 'center', padding: 32 }}>
-            // niciun comentariu. fii primul.
+            {t('noComments')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -106,7 +108,7 @@ export default function Comments({ postId }) {
                       }
                     </div>
                     <span style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
-                      {c.profiles?.display_name || 'Anonim'}
+                      {c.profiles?.display_name || t('anonymous')}
                     </span>
                     <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-4)' }}>{timeAgo(c.created_at)}</span>
                   </div>

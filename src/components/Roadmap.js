@@ -1,18 +1,27 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 import { GridBg } from './Decorations';
 import Reveal from './Reveal';
 
-const STATUS = {
-  done: { icon: '✓', color: '#68c868', label: 'Shipped' },
-  in_progress: { icon: '●', color: 'var(--accent)', label: 'Building' },
-  todo: { icon: '○', color: 'var(--text-4)', label: 'Planned' },
-};
+function localizedField(field, locale) {
+  if (!field) return '';
+  if (typeof field === 'object') return field[locale] || field.en || field.ro || '';
+  return field;
+}
 
 export default function Roadmap({ embedded = false }) {
   const [topics, setTopics] = useState([]);
   const [expanded, setExpanded] = useState(null);
+  const locale = useLocale();
+  const t = useTranslations('roadmap');
+
+  const STATUS = {
+    done: { icon: '✓', color: '#68c868', label: t('statusShipped') },
+    in_progress: { icon: '●', color: 'var(--accent)', label: t('statusBuilding') },
+    todo: { icon: '○', color: 'var(--text-4)', label: t('statusPlanned') },
+  };
 
   useEffect(() => {
     supabase.from('roadmap_topics').select('*, roadmap_items(*)').order('sort_order')
@@ -44,13 +53,13 @@ export default function Roadmap({ embedded = false }) {
         <Reveal>
           <div style={{ marginBottom: 32 }}>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent)', marginBottom: 8, letterSpacing: '0.08em' }}>
-              // roadmap
+              {t('comment')}
             </div>
             <h2 style={{ fontFamily: 'var(--heading)', fontSize: 28, fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.02em', marginBottom: 6 }}>
-              Ce construiesc
+              {t('title')}
             </h2>
             <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text-2)' }}>
-              Aplicațiile la care lucrez — progress tracked în real time.
+              {t('description')}
             </p>
           </div>
         </Reveal>
@@ -78,10 +87,10 @@ export default function Roadmap({ embedded = false }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 14 }}>
                     <div>
                       <h3 style={{ fontFamily: 'var(--heading)', fontSize: 17, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-                        {topic.title}
+                        {localizedField(topic.title, locale)}
                       </h3>
                       {topic.description && (
-                        <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-3)' }}>{topic.description}</p>
+                        <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-3)' }}>{localizedField(topic.description, locale)}</p>
                       )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -113,7 +122,7 @@ export default function Roadmap({ embedded = false }) {
 
                   {cur && !isOpen && (
                     <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-3)', marginTop: 10 }}>
-                      → <span style={{ color: 'var(--accent)' }}>{cur.title}</span>
+                      → <span style={{ color: 'var(--accent)' }}>{localizedField(cur.title, locale)}</span>
                     </p>
                   )}
 
@@ -139,12 +148,12 @@ export default function Roadmap({ embedded = false }) {
                                 color: item.status === 'done' ? 'var(--text-3)' : 'var(--text)',
                                 textDecoration: item.status === 'done' ? 'line-through' : 'none',
                                 opacity: item.status === 'done' ? 0.6 : 1,
-                              }}>{item.title}</span>
+                              }}>{localizedField(item.title, locale)}</span>
                               {item.status === 'in_progress' && (
                                 <span style={{
                                   fontFamily: 'var(--mono)', fontSize: 9, padding: '2px 8px', borderRadius: 4,
                                   background: 'rgba(0,212,170,0.1)', color: 'var(--accent)', marginLeft: 'auto',
-                                }}>în curs</span>
+                                }}>{t('inProgress')}</span>
                               )}
                             </div>
                           );

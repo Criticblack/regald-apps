@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "home": "Acasă",
+    "roadmap": "Roadmap",
+    "about": "Despre"
+  },
+  "hero": {
+    "latestStream": "latest stream",
+    "latestPost": "latest post"
+  },
+  "posts": {
+    "sectionComment": "// posts",
+    "allPosts": "Toate postările",
+    "filterAll": "Toate",
+    "filterText": "</> Text",
+    "noPostsFilter": "// nicio postare cu acest filtru",
+    "noPostsCategory": "// nicio postare în această categorie",
+    "noPostsTag": "// nicio postare cu tag-ul {tag}",
+    "badgeStream": "STREAM",
+    "badgeText": "TEXT"
+  },
+  "terminal": {
+    "quote": "Nu sunt guru. Sunt un developer din Moldova care construiește aplicații, face greșeli live pe stream, și documentează totul."
+  },
+  "about": {
+    "role": "Android Developer · Moldova",
+    "description": "Construiesc aplicații Android, streamuiesc procesul, și documentez tot ce învăț pe parcurs. De la idee la Play Store — cu greșeli, refactorizări, și ocazional cod care chiar funcționează.",
+    "youtubeLabel": "YouTube:",
+    "youtubeName": "Regald Apps",
+    "youtubeFocus": "Focus: Android dev, live coding, app launches"
+  },
+  "footer": {
+    "copyright": "© 2026 regald.apps",
+    "tagline": "made with caffeine && kotlin"
+  },
+  "comments": {
+    "title": "Comentarii",
+    "placeholder": "Scrie un comentariu...",
+    "placeholderAuth": "Conectează-te pentru a comenta...",
+    "send": "Trimite",
+    "noComments": "// niciun comentariu. fii primul.",
+    "deleteConfirm": "Ștergi comentariul?",
+    "anonymous": "Anonim",
+    "authRequired": "// trebuie autentificare",
+    "now": "acum"
+  },
+  "rating": {
+    "noVotes": "fără voturi"
+  },
+  "roadmap": {
+    "comment": "// roadmap",
+    "title": "Ce construiesc",
+    "description": "Aplicațiile la care lucrez — progress tracked în real time.",
+    "statusShipped": "Shipped",
+    "statusBuilding": "Building",
+    "statusPlanned": "Planned",
+    "inProgress": "în curs"
+  },
+  "auth": {
+    "login": "Conectează-te",
+    "signup": "Creează cont",
+    "googleButton": "Continuă cu Google",
+    "or": "sau",
+    "nameLabel": "Numele tău",
+    "emailLabel": "Email",
+    "passwordLabel": "Parolă",
+    "namePlaceholder": "Numele tău",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Parolă",
+    "submitLogin": "Intră",
+    "submitSignup": "Creează cont",
+    "loading": "Așteaptă...",
+    "subtitle": "// pentru a comenta și vota",
+    "noAccount": "Nu ai cont? ",
+    "hasAccount": "Ai deja cont? ",
+    "switchToSignup": "Înregistrează-te",
+    "switchToLogin": "Conectează-te",
+    "successSignup": "Cont creat! Verifică emailul.",
+    "errorLogin": "Email sau parolă incorectă"
+  },
+  "post": {
+    "back": "← înapoi"
+  },
+  "category": {
+    "allFilter": "Toate ({count})"
+  }
+}

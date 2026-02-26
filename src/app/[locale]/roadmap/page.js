@@ -1,0 +1,8 @@
+import RoadmapView from './RoadmapView';
+
+export const revalidate = 60;
+export const metadata = { title: 'Roadmap — Regald Apps' };
+
+export default function RoadmapPage() {
+  return <RoadmapView />;
+}

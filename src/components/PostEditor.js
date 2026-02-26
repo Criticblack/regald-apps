@@ -5,15 +5,21 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import LanguageTabs from '@/components/LanguageTabs';
+
+function initI18nField(val) {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return { ro: val.ro || '', en: val.en || '', ru: val.ru || '' };
+  return { ro: typeof val === 'string' ? val : '', en: '', ru: '' };
+}
 
 export default function PostEditor({ initialData = null }) {
   const isEdit = !!initialData;
   const router = useRouter();
 
-  const [title, setTitle] = useState(initialData?.title || '');
+  const [title, setTitle] = useState(initI18nField(initialData?.title));
   const [slug, setSlug] = useState(initialData?.slug || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [content, setContent] = useState(initialData?.content || '');
+  const [description, setDescription] = useState(initI18nField(initialData?.description));
+  const [content, setContent] = useState(initI18nField(initialData?.content));
   const [type, setType] = useState(initialData?.type || 'text');
   const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtube_url || '');
   const [duration, setDuration] = useState(initialData?.duration || '');
@@ -22,8 +28,8 @@ export default function PostEditor({ initialData = null }) {
   const [draft, setDraft] = useState(initialData?.draft ?? true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [activeLang, setActiveLang] = useState('ro');
 
-  // Fetch categories and tags from DB
   const [categories, setCategories] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [newTagInput, setNewTagInput] = useState('');
@@ -31,7 +37,6 @@ export default function PostEditor({ initialData = null }) {
   useEffect(() => {
     supabase.from('categories').select('*').order('sort_order').then(({ data }) => {
       setCategories(data || []);
-      // Set default category if creating new post
       if (!isEdit && data?.length > 0 && !categoryId) {
         setCategoryId(data[0].id);
       }
@@ -42,9 +47,10 @@ export default function PostEditor({ initialData = null }) {
   }, []);
 
   function handleTitleChange(val) {
-    setTitle(val);
+    setTitle({ ...title, [activeLang]: val });
     if (!isEdit) {
-      setSlug(val.toLowerCase()
+      const slugSource = activeLang === 'en' ? val : (title.en || val);
+      setSlug(slugSource.toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       );
@@ -61,12 +67,11 @@ export default function PostEditor({ initialData = null }) {
     e.preventDefault();
     const name = newTagInput.trim().toLowerCase();
     if (!name) return;
-    const slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const tagSlug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    const { data, error } = await supabase.from('tags').insert({ name, slug }).select().single();
+    const { data, error } = await supabase.from('tags').insert({ name, slug: tagSlug }).select().single();
     if (error) {
       if (error.code === '23505') {
-        // Already exists, just select it
         if (!selectedTags.includes(name)) setSelectedTags([...selectedTags, name]);
       }
     } else {
@@ -125,6 +130,14 @@ export default function PostEditor({ initialData = null }) {
 
       <form onSubmit={handleSave} style={{ maxWidth: 760, margin: '0 auto', padding: '40px 24px' }}>
 
+        {/* Language Tabs */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
+            Limbă conținut
+          </label>
+          <LanguageTabs activeLang={activeLang} onSwitch={setActiveLang} />
+        </div>
+
         {/* Type + Category row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
           <div>
@@ -151,9 +164,10 @@ export default function PostEditor({ initialData = null }) {
               style={{ cursor: 'pointer' }}
             >
               <option value="">— Fără categorie —</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
+              {categories.map(cat => {
+                const catName = typeof cat.name === 'object' ? (cat.name.ro || cat.name.en || '') : cat.name;
+                return <option key={cat.id} value={cat.id}>{catName}</option>;
+              })}
             </select>
           </div>
         </div>
@@ -161,11 +175,11 @@ export default function PostEditor({ initialData = null }) {
         {/* Title */}
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-            Titlu
+            Titlu [{activeLang.toUpperCase()}]
           </label>
-          <input className="admin-input" value={title}
+          <input className="admin-input" value={title[activeLang]}
             onChange={e => handleTitleChange(e.target.value)}
-            placeholder="Titlul postării" required
+            placeholder={`Titlul postării (${activeLang.toUpperCase()})`} required={activeLang === 'ro'}
             style={{ fontFamily: 'var(--serif)', fontSize: 20 }} />
         </div>
 
@@ -186,11 +200,11 @@ export default function PostEditor({ initialData = null }) {
         {/* Description */}
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-            Descriere scurtă
+            Descriere scurtă [{activeLang.toUpperCase()}]
           </label>
-          <textarea className="admin-input" value={description}
-            onChange={e => setDescription(e.target.value)}
-            placeholder="O descriere scurtă pentru card și SEO..."
+          <textarea className="admin-input" value={description[activeLang]}
+            onChange={e => setDescription({ ...description, [activeLang]: e.target.value })}
+            placeholder={`O descriere scurtă (${activeLang.toUpperCase()})...`}
             rows={3} style={{ resize: 'vertical', minHeight: 80 }} />
         </div>
 
@@ -265,11 +279,11 @@ export default function PostEditor({ initialData = null }) {
         {/* Content */}
         <div style={{ marginBottom: 28 }}>
           <label style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-            Conținut (Markdown)
+            Conținut (Markdown) [{activeLang.toUpperCase()}]
           </label>
-          <textarea className="admin-textarea" value={content}
-            onChange={e => setContent(e.target.value)}
-            placeholder="Scrie conținutul aici... **bold**, *italic*, ## titluri, > citate" />
+          <textarea className="admin-textarea" value={content[activeLang]}
+            onChange={e => setContent({ ...content, [activeLang]: e.target.value })}
+            placeholder={`Scrie conținutul aici (${activeLang.toUpperCase()})... **bold**, *italic*, ## titluri, > citate`} />
           <p style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-light)', marginTop: 4 }}>
             Suportă Markdown: **bold**, *italic*, ## heading, {'>'} citat, [link](url)
           </p>

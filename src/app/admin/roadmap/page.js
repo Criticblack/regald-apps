@@ -5,6 +5,18 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import LanguageTabs from '@/components/LanguageTabs';
+
+function initI18nField(val) {
+  if (val && typeof val === 'object' && !Array.isArray(val)) return { ro: val.ro || '', en: val.en || '', ru: val.ru || '' };
+  return { ro: typeof val === 'string' ? val : '', en: '', ru: '' };
+}
+
+function getDisplayName(field) {
+  if (!field) return '';
+  if (typeof field === 'object') return field.ro || field.en || '';
+  return field;
+}
 
 const STATUS_LABELS = { done: '✓ Done', in_progress: '◐ In progress', todo: '○ To do' };
 const STATUS_COLORS = {
@@ -16,9 +28,11 @@ const STATUS_COLORS = {
 export default function AdminRoadmap() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newTopic, setNewTopic] = useState('');
-  const [newTopicDesc, setNewTopicDesc] = useState('');
-  const [newItems, setNewItems] = useState({}); // { topicId: 'new item text' }
+  const [newTopic, setNewTopic] = useState({ ro: '', en: '', ru: '' });
+  const [newTopicDesc, setNewTopicDesc] = useState({ ro: '', en: '', ru: '' });
+  const [newItems, setNewItems] = useState({}); // { topicId: { ro: '', en: '', ru: '' } }
+  const [activeLang, setActiveLang] = useState('ro');
+  const [itemLangs, setItemLangs] = useState({}); // { topicId: 'ro' }
   const router = useRouter();
 
   useEffect(() => {
@@ -45,14 +59,17 @@ export default function AdminRoadmap() {
 
   async function addTopic(e) {
     e.preventDefault();
-    if (!newTopic.trim()) return;
+    if (!newTopic.ro.trim() && !newTopic.en.trim()) return;
+    const descObj = (newTopicDesc.ro || newTopicDesc.en || newTopicDesc.ru)
+      ? { ro: newTopicDesc.ro.trim(), en: newTopicDesc.en.trim(), ru: newTopicDesc.ru.trim() }
+      : null;
     await supabase.from('roadmap_topics').insert({
-      title: newTopic.trim(),
-      description: newTopicDesc.trim() || null,
+      title: { ro: newTopic.ro.trim(), en: newTopic.en.trim(), ru: newTopic.ru.trim() },
+      description: descObj,
       sort_order: topics.length + 1,
     });
-    setNewTopic('');
-    setNewTopicDesc('');
+    setNewTopic({ ro: '', en: '', ru: '' });
+    setNewTopicDesc({ ro: '', en: '', ru: '' });
     fetchAll();
   }
 
@@ -63,13 +80,16 @@ export default function AdminRoadmap() {
   }
 
   async function addItem(topicId) {
-    const text = newItems[topicId]?.trim();
-    if (!text) return;
+    const itemVal = newItems[topicId] || { ro: '', en: '', ru: '' };
+    if (!itemVal.ro?.trim() && !itemVal.en?.trim()) return;
     const count = topics.find(t => t.id === topicId)?.roadmap_items?.length || 0;
     await supabase.from('roadmap_items').insert({
-      topic_id: topicId, title: text, status: 'todo', sort_order: count + 1,
+      topic_id: topicId,
+      title: { ro: itemVal.ro?.trim() || '', en: itemVal.en?.trim() || '', ru: itemVal.ru?.trim() || '' },
+      status: 'todo',
+      sort_order: count + 1,
     });
-    setNewItems({ ...newItems, [topicId]: '' });
+    setNewItems({ ...newItems, [topicId]: { ro: '', en: '', ru: '' } });
     fetchAll();
   }
 
@@ -90,6 +110,10 @@ export default function AdminRoadmap() {
     return Math.round(((done + inProg * 0.5) / items.length) * 100);
   }
 
+  function getItemLang(topicId) {
+    return itemLangs[topicId] || 'ro';
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <nav style={{
@@ -105,7 +129,7 @@ export default function AdminRoadmap() {
 
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px' }}>
         <h1 style={{ fontFamily: 'var(--serif)', fontSize: 28, fontWeight: 400, marginBottom: 32 }}>
-          Roadmap Filosofie
+          Roadmap
         </h1>
 
         {/* Add topic */}
@@ -116,11 +140,14 @@ export default function AdminRoadmap() {
           <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
             ADAUGĂ TOPIC NOU
           </div>
+          <LanguageTabs activeLang={activeLang} onSwitch={setActiveLang} />
           <div style={{ display: 'flex', gap: 10 }}>
-            <input className="admin-input" value={newTopic} onChange={e => setNewTopic(e.target.value)}
-              placeholder="Ex: Filosofia Orientală" style={{ flex: 1 }} />
-            <input className="admin-input" value={newTopicDesc} onChange={e => setNewTopicDesc(e.target.value)}
-              placeholder="Descriere (opțional)" style={{ flex: 1.5 }} />
+            <input className="admin-input" value={newTopic[activeLang]}
+              onChange={e => setNewTopic({ ...newTopic, [activeLang]: e.target.value })}
+              placeholder={`Titlu topic (${activeLang.toUpperCase()})`} style={{ flex: 1 }} />
+            <input className="admin-input" value={newTopicDesc[activeLang]}
+              onChange={e => setNewTopicDesc({ ...newTopicDesc, [activeLang]: e.target.value })}
+              placeholder={`Descriere (${activeLang.toUpperCase()}, opțional)`} style={{ flex: 1.5 }} />
             <button type="submit" className="admin-btn" style={{ padding: '10px 20px', fontSize: 11 }}>+ Adaugă</button>
           </div>
         </form>
@@ -128,6 +155,7 @@ export default function AdminRoadmap() {
         {/* Topics */}
         {topics.map(topic => {
           const progress = getProgress(topic.roadmap_items);
+          const iLang = getItemLang(topic.id);
           return (
             <div key={topic.id} style={{
               background: 'var(--card)', border: '1.5px solid var(--border)', borderRadius: 14,
@@ -137,10 +165,10 @@ export default function AdminRoadmap() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 16 }}>
                 <div>
                   <h3 style={{ fontFamily: 'var(--serif)', fontSize: 20, fontWeight: 400, color: 'var(--text)', marginBottom: 4 }}>
-                    {topic.title}
+                    {getDisplayName(topic.title)}
                   </h3>
                   {topic.description && (
-                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-3)' }}>{topic.description}</p>
+                    <p style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-3)' }}>{getDisplayName(topic.description)}</p>
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -174,7 +202,6 @@ export default function AdminRoadmap() {
                       padding: '8px 12px', borderRadius: 8,
                       background: item.status === 'done' ? '#033303' : 'transparent',
                     }}>
-                      {/* Status cycle button */}
                       <button onClick={() => {
                         const next = item.status === 'todo' ? 'in_progress' : item.status === 'in_progress' ? 'done' : 'todo';
                         updateItemStatus(item.id, next);
@@ -191,7 +218,7 @@ export default function AdminRoadmap() {
                         flex: 1, textDecoration: item.status === 'done' ? 'line-through' : 'none',
                         opacity: item.status === 'done' ? 0.6 : 1,
                       }}>
-                        {item.title}
+                        {getDisplayName(item.title)}
                       </span>
 
                       <button onClick={() => deleteItem(item.id)} style={{
@@ -207,16 +234,23 @@ export default function AdminRoadmap() {
               </div>
 
               {/* Add item */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <input className="admin-input" value={newItems[topic.id] || ''}
-                  onChange={e => setNewItems({ ...newItems, [topic.id]: e.target.value })}
-                  placeholder="Adaugă item (ex: Aristotel — Poetica)"
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem(topic.id); } }}
-                  style={{ flex: 1, padding: '8px 12px', fontSize: 12 }} />
-                <button type="button" onClick={() => addItem(topic.id)}
-                  className="admin-btn admin-btn-outline" style={{ padding: '8px 14px', fontSize: 10 }}>
-                  + Item
-                </button>
+              <div style={{ marginTop: 12 }}>
+                <LanguageTabs activeLang={iLang} onSwitch={l => setItemLangs({ ...itemLangs, [topic.id]: l })} />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input className="admin-input"
+                    value={(newItems[topic.id] || {})[iLang] || ''}
+                    onChange={e => setNewItems({
+                      ...newItems,
+                      [topic.id]: { ...(newItems[topic.id] || { ro: '', en: '', ru: '' }), [iLang]: e.target.value }
+                    })}
+                    placeholder={`Adaugă item (${iLang.toUpperCase()})`}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem(topic.id); } }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: 12 }} />
+                  <button type="button" onClick={() => addItem(topic.id)}
+                    className="admin-btn admin-btn-outline" style={{ padding: '8px 14px', fontSize: 10 }}>
+                    + Item
+                  </button>
+                </div>
               </div>
             </div>
           );
