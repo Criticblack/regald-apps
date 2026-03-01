@@ -8,6 +8,9 @@ import Logo from '@/components/Logo';
 import LanguageTabs from '@/components/LanguageTabs';
 
 function initI18nField(val) {
+  if (val && typeof val === 'string' && val.startsWith('{')) {
+    try { val = JSON.parse(val); } catch {}
+  }
   if (val && typeof val === 'object' && !Array.isArray(val)) return { ro: val.ro || '', en: val.en || '', ru: val.ru || '' };
   return { ro: typeof val === 'string' ? val : '', en: '', ru: '' };
 }

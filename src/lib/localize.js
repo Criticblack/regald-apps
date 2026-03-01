@@ -7,7 +7,12 @@
  */
 export function localizedField(field, locale) {
   if (field == null) return '';
-  if (typeof field === 'string') return field;
+  if (typeof field === 'string') {
+    if (field.startsWith('{')) {
+      try { return localizedField(JSON.parse(field), locale); } catch {}
+    }
+    return field;
+  }
   if (typeof field === 'object') {
     const val = field[locale] || field.en || field.ro || '';
     return typeof val === 'string' ? val : '';
