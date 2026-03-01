@@ -54,7 +54,13 @@
     "statusShipped": "Shipped",
     "statusBuilding": "Building",
     "statusPlanned": "Planned",
-    "inProgress": "în curs"
+    "inProgress": "în curs",
+    "privacyPolicy": "Politica de Confidențialitate",
+    "playStore": "Google Play"
+  },
+  "privacy": {
+    "title": "Politica de Confidențialitate",
+    "back": "← înapoi la roadmap"
   },
   "auth": {
     "login": "Conectează-te",

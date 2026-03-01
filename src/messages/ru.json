@@ -54,7 +54,13 @@
     "statusShipped": "Shipped",
     "statusBuilding": "Building",
     "statusPlanned": "Planned",
-    "inProgress": "в процессе"
+    "inProgress": "в процессе",
+    "privacyPolicy": "Политика конфиденциальности",
+    "playStore": "Google Play"
+  },
+  "privacy": {
+    "title": "Политика конфиденциальности",
+    "back": "← назад к roadmap"
   },
   "auth": {
     "login": "Войти",

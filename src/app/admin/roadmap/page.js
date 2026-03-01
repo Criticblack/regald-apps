@@ -25,14 +25,24 @@ const STATUS_COLORS = {
   todo: { bg: 'var(--tag-bg)', color: 'var(--text-muted)', border: 'var(--border)' },
 };
 
+function generateSlug(text) {
+  return text.toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
 export default function AdminRoadmap() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTopic, setNewTopic] = useState({ ro: '', en: '', ru: '' });
   const [newTopicDesc, setNewTopicDesc] = useState({ ro: '', en: '', ru: '' });
+  const [newTopicSlug, setNewTopicSlug] = useState('');
   const [newItems, setNewItems] = useState({}); // { topicId: { ro: '', en: '', ru: '' } }
   const [activeLang, setActiveLang] = useState('ro');
   const [itemLangs, setItemLangs] = useState({}); // { topicId: 'ro' }
+  const [policyOpen, setPolicyOpen] = useState(null); // topicId or null
+  const [policyLangs, setPolicyLangs] = useState({}); // { topicId: 'ro' }
+  const [policyEdits, setPolicyEdits] = useState({}); // { topicId: { ro, en, ru } }
+  const [storeUrls, setStoreUrls] = useState({}); // { topicId: 'url' }
   const router = useRouter();
 
   useEffect(() => {
@@ -63,13 +73,30 @@ export default function AdminRoadmap() {
     const descObj = (newTopicDesc.ro || newTopicDesc.en || newTopicDesc.ru)
       ? { ro: newTopicDesc.ro.trim(), en: newTopicDesc.en.trim(), ru: newTopicDesc.ru.trim() }
       : null;
+    const slug = newTopicSlug.trim() || generateSlug(newTopic.en || newTopic.ro);
     await supabase.from('roadmap_topics').insert({
       title: { ro: newTopic.ro.trim(), en: newTopic.en.trim(), ru: newTopic.ru.trim() },
       description: descObj,
+      slug: slug || null,
       sort_order: topics.length + 1,
     });
     setNewTopic({ ro: '', en: '', ru: '' });
     setNewTopicDesc({ ro: '', en: '', ru: '' });
+    setNewTopicSlug('');
+    fetchAll();
+  }
+
+  async function savePolicy(topicId) {
+    const edits = policyEdits[topicId];
+    if (!edits) return;
+    const policyObj = { ro: edits.ro || '', en: edits.en || '', ru: edits.ru || '' };
+    await supabase.from('roadmap_topics').update({ privacy_policy: policyObj }).eq('id', topicId);
+    fetchAll();
+  }
+
+  async function saveStoreUrl(topicId) {
+    const url = storeUrls[topicId] ?? '';
+    await supabase.from('roadmap_topics').update({ play_store_url: url.trim() || null }).eq('id', topicId);
     fetchAll();
   }
 
@@ -141,14 +168,28 @@ export default function AdminRoadmap() {
             ADAUGĂ TOPIC NOU
           </div>
           <LanguageTabs activeLang={activeLang} onSwitch={setActiveLang} />
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
             <input className="admin-input" value={newTopic[activeLang]}
-              onChange={e => setNewTopic({ ...newTopic, [activeLang]: e.target.value })}
+              onChange={e => {
+                const val = e.target.value;
+                setNewTopic({ ...newTopic, [activeLang]: val });
+                if (activeLang === 'en' && !newTopicSlug) setNewTopicSlug(generateSlug(val));
+              }}
               placeholder={`Titlu topic (${activeLang.toUpperCase()})`} style={{ flex: 1 }} />
             <input className="admin-input" value={newTopicDesc[activeLang]}
               onChange={e => setNewTopicDesc({ ...newTopicDesc, [activeLang]: e.target.value })}
               placeholder={`Descriere (${activeLang.toUpperCase()}, opțional)`} style={{ flex: 1.5 }} />
             <button type="submit" className="admin-btn" style={{ padding: '10px 20px', fontSize: 11 }}>+ Adaugă</button>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <input className="admin-input" value={newTopicSlug}
+              onChange={e => setNewTopicSlug(e.target.value)}
+              placeholder="slug (ex: fitness-tracker-pro)" style={{ flex: 1, fontSize: 11 }} />
+            {newTopicSlug && (
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-muted)' }}>
+                /privacy/{newTopicSlug}
+              </span>
+            )}
           </div>
         </form>
 
@@ -179,6 +220,71 @@ export default function AdminRoadmap() {
                     Șterge
                   </button>
                 </div>
+              </div>
+
+              {/* Slug */}
+              {topic.slug && (
+                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-muted)', marginBottom: 8 }}>
+                  /privacy/{topic.slug}
+                </div>
+              )}
+
+              {/* Play Store URL */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+                <input className="admin-input"
+                  value={storeUrls[topic.id] ?? topic.play_store_url ?? ''}
+                  onChange={e => setStoreUrls({ ...storeUrls, [topic.id]: e.target.value })}
+                  placeholder="Play Store URL (ex: https://play.google.com/store/apps/details?id=...)"
+                  style={{ flex: 1, fontSize: 11, padding: '6px 10px' }} />
+                <button type="button" onClick={() => saveStoreUrl(topic.id)}
+                  className="admin-btn admin-btn-outline" style={{ padding: '5px 14px', fontSize: 10, flexShrink: 0 }}>
+                  Save URL
+                </button>
+              </div>
+
+              {/* Privacy Policy Editor */}
+              <div style={{ marginBottom: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (policyOpen === topic.id) {
+                      setPolicyOpen(null);
+                    } else {
+                      setPolicyOpen(topic.id);
+                      if (!policyEdits[topic.id]) {
+                        setPolicyEdits({ ...policyEdits, [topic.id]: initI18nField(topic.privacy_policy) });
+                      }
+                    }
+                  }}
+                  className="admin-btn admin-btn-outline"
+                  style={{ padding: '5px 14px', fontSize: 10 }}
+                >
+                  {policyOpen === topic.id ? '▾ Privacy Policy' : '▸ Privacy Policy'}
+                </button>
+
+                {policyOpen === topic.id && (
+                  <div style={{ marginTop: 12, padding: 16, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10 }}>
+                    <LanguageTabs
+                      activeLang={policyLangs[topic.id] || 'ro'}
+                      onSwitch={l => setPolicyLangs({ ...policyLangs, [topic.id]: l })}
+                    />
+                    <textarea
+                      className="admin-input"
+                      value={(policyEdits[topic.id] || {})[policyLangs[topic.id] || 'ro'] || ''}
+                      onChange={e => setPolicyEdits({
+                        ...policyEdits,
+                        [topic.id]: { ...(policyEdits[topic.id] || { ro: '', en: '', ru: '' }), [policyLangs[topic.id] || 'ro']: e.target.value }
+                      })}
+                      placeholder={`Privacy policy markdown (${(policyLangs[topic.id] || 'ro').toUpperCase()})`}
+                      style={{ width: '100%', minHeight: 200, fontFamily: 'var(--mono)', fontSize: 12, resize: 'vertical', padding: 12 }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                      <button type="button" onClick={() => savePolicy(topic.id)} className="admin-btn" style={{ padding: '8px 20px', fontSize: 11 }}>
+                        Salvează Policy
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Progress bar */}

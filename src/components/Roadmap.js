@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { GridBg } from './Decorations';
 import Reveal from './Reveal';
 
+import { Link } from '@/i18n/navigation';
 import { localizedField } from '@/lib/localize';
 
 export default function Roadmap({ embedded = false }) {
@@ -155,6 +156,28 @@ export default function Roadmap({ embedded = false }) {
                           );
                         })}
                       </div>
+                      {(topic.play_store_url || (topic.privacy_policy && topic.slug)) && (
+                        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--line)', display: 'flex', gap: 16 }}>
+                          {topic.play_store_url && (
+                            <a href={topic.play_store_url} target="_blank" rel="noopener noreferrer" style={{
+                              fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent)',
+                              textDecoration: 'none', transition: 'opacity 0.2s',
+                            }}
+                            onMouseEnter={e => e.target.style.opacity = '0.7'}
+                            onMouseLeave={e => e.target.style.opacity = '1'}
+                            >▶ {t('playStore')}</a>
+                          )}
+                          {topic.privacy_policy && topic.slug && (
+                            <Link href={`/privacy/${topic.slug}`} style={{
+                              fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent)',
+                              textDecoration: 'none', transition: 'opacity 0.2s',
+                            }}
+                            onMouseEnter={e => e.target.style.opacity = '0.7'}
+                            onMouseLeave={e => e.target.style.opacity = '1'}
+                            >{t('privacyPolicy')}</Link>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
