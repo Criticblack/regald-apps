@@ -36,10 +36,10 @@ export default function PrivacyPolicyContent({ topic }) {
         <h1 style={{
           fontFamily: 'var(--heading)', fontSize: 38, fontWeight: 700,
           lineHeight: 1.15, color: 'var(--text)', marginBottom: 8, letterSpacing: '-0.03em',
-        }}>{t('privacy.title')}</h1>
+        }}>{title}</h1>
 
         <p style={{ fontFamily: 'var(--heading)', fontSize: 22, fontWeight: 600, color: 'var(--text-2)', marginBottom: 40 }}>
-          {title}
+          {t('privacy.title')}
         </p>
 
         {/* Content */}
