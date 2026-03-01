@@ -38,7 +38,7 @@ export default function PrivacyPolicyContent({ topic }) {
           lineHeight: 1.15, color: 'var(--text)', marginBottom: 8, letterSpacing: '-0.03em',
         }}>{t('privacy.title')}</h1>
 
-        <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text-3)', marginBottom: 40 }}>
+        <p style={{ fontFamily: 'var(--heading)', fontSize: 22, fontWeight: 600, color: 'var(--text-2)', marginBottom: 40 }}>
           {title}
         </p>
 
